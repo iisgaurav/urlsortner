@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: urlsortner
+    runtime: docker
+    repo: https://github.com/iisgaurav/urlsortner
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8501
+      - key: API_BASE_URL
+        value: http://localhost:8000
