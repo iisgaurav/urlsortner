@@ -167,9 +167,13 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
 }
 
-# CORS Settings (for frontend integration)
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Only allow all in development
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='').split(',') if not DEBUG else []
+# CORS Configuration
+CORS_ALLOWED_ORIGINS_STR = config('CORS_ALLOWED_ORIGINS', default='http://localhost:8000,http://localhost:8501')
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_STR.split(',') if origin.strip()]
+
+# Allow all origins in development
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
 
 # URL Shortener Specific Settings
 SHORT_URL_DOMAIN = config('SHORT_URL_DOMAIN', default='http://localhost:8000')
