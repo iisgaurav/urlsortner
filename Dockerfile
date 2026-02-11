@@ -18,6 +18,5 @@ COPY . .
 
 RUN chmod +x start.sh
 
-EXPOSE 8501
-
+# Run both Django and Streamlit
 CMD ["sh", "start.sh"]
