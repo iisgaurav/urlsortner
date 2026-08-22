@@ -1,309 +1,159 @@
-# 🔗 URL Shortener
-
-A production-grade URL shortening service built with Django REST Framework and Streamlit. Transform long URLs into short, trackable links with advanced analytics, QR code generation, and a beautiful user interface.
-
-[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/django-4.2-green.svg)](https://www.djangoproject.com/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-## ✨ Features
-
-### Core Functionality
-- **URL Shortening** - Convert long URLs into short, memorable links
-- **Custom Short Codes** - Choose your own custom aliases
-- **QR Code Generation** - Auto-generate QR codes for any short URL
-- **Expiry Dates** - Set automatic expiration for temporary links
-- **Click Analytics** - Track clicks with IP address and user agent
-- **Rate Limiting** - Protect against abuse (10 requests/minute per IP)
-
-### User Interface
-- **Modern Streamlit UI** - Clean, professional web interface
-- **Real-time Analytics Dashboard** - Interactive charts and metrics
-- **URL History** - Track all your created short URLs
-- **Insights & Trends** - Visualize click patterns
-- **Mobile Responsive** - Works on all devices
-
-### Backend Features
-- **Redis Caching** - Lightning-fast redirects with cache-aside pattern
-- **Celery Background Jobs** - Async click tracking and cleanup
-- **RESTful API** - Full-featured API for programmatic access
-- **PostgreSQL Database** - Reliable cloud-hosted storage (Supabase)
-- **Docker Support** - Ready for containerized deployment
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.11+
-- PostgreSQL (or Supabase account)
-- Redis (or Redis Cloud account)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/url-shortener.git
-   cd url-shortener
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database and Redis credentials
-   ```
-
-4. **Run migrations**
-   ```bash
-   python manage.py migrate
-   ```
-
-5. **Start the application**
-   ```bash
-   # Terminal 1: Django API
-   python manage.py runserver
-   
-   # Terminal 2: Streamlit UI
-   streamlit run streamlit_app.py
-   ```
-
-6. **Access the application**
-   - Streamlit UI: http://localhost:8501
-   - Django API: http://localhost:8000
-   - Admin Panel: http://localhost:8000/admin
-
-## 📚 API Documentation
-
-### Endpoints
-
-#### Create Short URL
-```http
-POST /api/shorten/
-Content-Type: application/json
-
-{
-  "original_url": "https://example.com/very/long/url",
-  "custom_code": "mylink",  // optional
-  "expiry_date": "2024-12-31T23:59:59Z"  // optional
-}
-```
-
-**Response:**
-```json
-{
-  "short_url": "http://localhost:8000/abc123",
-  "short_code": "abc123",
-  "original_url": "https://example.com/very/long/url",
-  "created_at": "2024-02-11T10:00:00Z"
-}
-```
-
-#### Redirect to Original URL
-```http
-GET /{short_code}/
-```
-Returns: 302 redirect to original URL
-
-#### Get Analytics
-```http
-GET /api/analytics/{short_code}/
-```
-
-**Response:**
-```json
-{
-  "short_code": "abc123",
-  "original_url": "https://example.com",
-  "total_clicks": 42,
-  "created_at": "2024-02-11T10:00:00Z",
-  "is_active": true,
-  "recent_clicks": [...]
-}
-```
-
-#### Delete URL
-```http
-DELETE /api/urls/{short_code}/
-```
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Django 4.2** - Web framework
-- **Django REST Framework** - API development
-- **PostgreSQL** - Database (Supabase)
-- **Redis** - Caching and message broker
-- **Celery** - Background task processing
-- **Gunicorn** - Production WSGI server
-
-### Frontend
-- **Streamlit** - Web UI framework
-- **Plotly** - Interactive charts
-- **Pandas** - Data manipulation
-
-### DevOps
-- **Docker** - Containerization
-- **Docker Compose** - Multi-container orchestration
-- **GitHub Actions** - CI/CD (optional)
-
-## 🌐 Deployment
-
-This application is ready to deploy to various platforms:
-
-### Quick Deploy (Recommended)
-
-**Koyeb** (Free tier, fastest)
-```bash
-# See KOYEB_DEPLOYMENT.md for detailed instructions
-1. Push to GitHub
-2. Connect to Koyeb
-3. Configure environment variables
-4. Deploy!
-```
-
-**Other Platforms:**
-- [Railway](DEPLOY_SINGLE_SERVICE.md) - Easy deployment
-- [Render](DEPLOY_SINGLE_SERVICE.md) - Free tier available
-- [Heroku](DEPLOYMENT_GUIDE.md) - Reliable platform
-- [VPS/Docker](DEPLOYMENT_GUIDE.md) - Full control
-
-**Deployment Guides:**
-- 📖 [Koyeb Deployment](KOYEB_DEPLOYMENT.md) - Recommended
-- 📖 [Single Service Deployment](DEPLOY_SINGLE_SERVICE.md) - Railway/Render
-- 📖 [Full Deployment Guide](DEPLOYMENT_GUIDE.md) - All options
-
-## 📁 Project Structure
-
-```
-url-shortener/
-├── config/                 # Django project settings
-│   ├── settings.py        # Main configuration
-│   ├── urls.py            # URL routing
-│   └── celery.py          # Celery configuration
-├── shortener/             # Main application
-│   ├── models.py          # Database models
-│   ├── views.py           # API endpoints
-│   ├── serializers.py     # DRF serializers
-│   ├── tasks.py           # Celery tasks
-│   ├── middleware.py      # Rate limiting
-│   └── utils.py           # Helper functions
-├── streamlit_app.py       # Streamlit UI
-├── requirements.txt       # Python dependencies
-├── Dockerfile             # Container configuration
-├── docker-compose.yml     # Multi-service setup
-├── start.sh               # Single-service startup script
-└── README.md              # This file
-```
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-Create a `.env` file based on `.env.example`:
-
-```bash
-# Database (Supabase)
-DATABASE_URL=postgresql://user:pass@host:port/db
-
-# Redis Cloud
-REDIS_HOST=your-redis-host
-REDIS_PORT=17479
-REDIS_PASSWORD=your-password
-
-# Django
-SECRET_KEY=your-secret-key
-DEBUG=False
-ALLOWED_HOSTS=.yourdomain.com
-
-# Application
-SHORT_URL_DOMAIN=https://yourdomain.com
-USE_DUMMY_CACHE=False
-RATE_LIMIT_REQUESTS=10
-RATE_LIMIT_WINDOW=60
-```
-
-## 🔧 Development
-
-### Running Tests
-```bash
-python manage.py test
-```
-
-### API Testing
-```bash
-python test_api.py
-```
-
-### Code Quality
-```bash
-# Format code
-black .
-
-# Lint
-flake8 .
-```
-
-### Docker Development
-```bash
-docker-compose up --build
-```
-
-## 📊 Features in Detail
-
-### Caching Strategy
-- **Cache-aside pattern** with Redis
-- 1-hour TTL for cached URLs
-- Automatic cache invalidation on updates
-- Sub-millisecond redirect times
-
-### Rate Limiting
-- **Sliding window algorithm**
-- IP-based tracking
-- Configurable limits via environment variables
-- Returns 429 status when exceeded
-
-### Background Jobs
-- **Async click logging** - Non-blocking analytics
-- **Periodic cleanup** - Removes expired URLs daily
-- **Celery Beat** - Scheduled task execution
-
-### Analytics
-- Total click count per URL
-- Individual click events with timestamps
-- IP address and user agent tracking
-- Recent activity visualization
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Django REST Framework for the excellent API toolkit
-- Streamlit for the beautiful UI framework
-- Supabase for reliable PostgreSQL hosting
-- Redis Cloud for fast caching
-
-## 📧 Contact
-
-For questions or support, please open an issue on GitHub.
+# 🔗 URL Shortener Pro
+
+![Python](https://img.shields.io/badge/Python-3.11-blue.svg)
+![Django](https://img.shields.io/badge/Django-4.2-green.svg)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.29-red.svg)
+![Redis](https://img.shields.io/badge/Redis-Cache-dc382d.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791.svg)
+![Celery](https://img.shields.io/badge/Celery-Async-yellowgreen.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
+
+A scalable, production-grade URL shortening service built with a powerful **Django REST API** backend and a sleek, interactive **Streamlit** dashboard. Designed for high performance, it features sub-millisecond redirects using Redis caching, asynchronous click tracking, and an intelligent Nginx reverse proxy routing system.
 
 ---
 
-**Built with ❤️ using Django, Streamlit, Redis, and PostgreSQL**
+## 🌟 Key Features
 
-⭐ Star this repo if you find it helpful!
+* **⚡ Sub-Millisecond Redirects:** Cache-aside pattern using Redis ensures ultra-fast URL redirection.
+* **📊 Real-Time Analytics:** Detailed click tracking including IP, User Agent, and geographic insights.
+* **🎨 Interactive Dashboard:** Beautiful Streamlit-based UI for managing URLs and visualizing analytics via Plotly.
+* **🔗 Custom Short Codes:** Generate automatic Base62 codes or define your own branded short links.
+* **⏱️ URL Expiry:** Set custom expiration dates for temporary links, automatically cleaned up by Celery Beat.
+* **📱 QR Code Generation:** Instantly generate and download QR codes for your short links.
+* **🛡️ Rate Limiting:** Sliding window algorithm using Redis to prevent abuse (default 10 req/min per IP).
+* **🐳 Dockerized:** Fully containerized with a multi-service setup (Django, Streamlit, Nginx) for easy deployment.
+
+---
+
+## 🏗️ Architecture
+
+The system uses a modern, distributed architecture:
+
+1. **Nginx Reverse Proxy:** Routes `/api/` and `/[code]` to Django, and `/` to Streamlit.
+2. **Django Backend:** Handles core business logic, REST APIs, and database interactions.
+3. **Streamlit Frontend:** Consumes the API and renders the interactive dashboard.
+4. **PostgreSQL:** Primary persistent data store (URLs and Click Events).
+5. **Redis:** In-memory store serving as the cache layer and Celery message broker.
+6. **Celery Workers:** Asynchronously process click events to prevent redirect latency.
+
+---
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+| :--- | :--- |
+| **Backend Framework** | Django 4.2 & Django REST Framework |
+| **Frontend UI** | Streamlit, Plotly, Pandas |
+| **Database** | PostgreSQL |
+| **Caching & Message Broker**| Redis |
+| **Task Queue** | Celery & Celery Beat |
+| **Web Server / Proxy** | Gunicorn & Nginx |
+| **Containerization** | Docker |
+
+---
+
+## 🚀 Quick Start (Local Development)
+
+### Prerequisites
+* Python 3.11+
+* PostgreSQL
+* Redis Server
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/iisgaurav/urlsortner.git
+cd urlsortner
+```
+
+### 2. Environment Setup
+Create a virtual environment and install dependencies:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 3. Environment Variables
+Create a `.env` file in the root directory based on `.env.example`:
+```bash
+cp .env.example .env
+```
+Ensure you update the `DATABASE_URL` and `REDIS_HOST` with your local credentials.
+
+### 4. Database Migrations
+```bash
+python manage.py migrate
+```
+
+### 5. Run the Application
+You can run the full stack using the provided shell script:
+```bash
+chmod +x start.sh
+./start.sh
+```
+This will start:
+* **Django API** on port `8000`
+* **Streamlit UI** on port `8501`
+* **Nginx Proxy** (requires proper setup locally, or run services individually)
+
+---
+
+## 🌐 Deployment (Render / Cloud)
+
+This project is optimized for deployment on Platforms as a Service (PaaS) like **Render**.
+
+1. **Connect Repository:** Link your GitHub repository in the Render dashboard.
+2. **Environment:** Choose the `Docker` environment.
+3. **Environment Variables:** Provide all necessary keys (Database, Redis, `SECRET_KEY`, etc.).
+4. **Deploy:** Render automatically builds the `Dockerfile` and runs `start.sh`.
+
+See the dedicated deployment guides in the repository (`RENDER_DEPLOYMENT.md`, `KOYEB_DEPLOYMENT.md`, etc.) for more details.
+
+---
+
+## 📖 API Documentation
+
+### Create Short URL
+* **URL:** `/api/shorten/`
+* **Method:** `POST`
+* **Body:**
+  ```json
+  {
+    "original_url": "https://example.com/very/long/path",
+    "custom_code": "mycode", 
+    "expiry_date": "2024-12-31T23:59:59Z"
+  }
+  ```
+
+### Get URL Analytics
+* **URL:** `/api/analytics/<short_code>/`
+* **Method:** `GET`
+* **Response:**
+  ```json
+  {
+    "short_code": "mycode",
+    "original_url": "https://example.com/...",
+    "total_clicks": 150,
+    "recent_clicks": [...]
+  }
+  ```
+
+### Redirect
+* **URL:** `/<short_code>/`
+* **Method:** `GET`
+* **Action:** Redirects to the original URL (HTTP 302) while tracking the click.
+
+---
+
+## 👨‍💻 Developer & Author
+
+Designed and developed by **Gaurav Verma**.
+
+Connect with me to discuss scalable system design, full-stack development, and cloud deployments!
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
